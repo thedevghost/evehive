@@ -27,6 +27,8 @@ Thumbs.db
 # Runtime data and uploads
 zeron-program/server/uploads/
 zeron-program/server/db/zeron_data/
+zeron-program/server/db/zeron_data_pglite/
+
 
 # Local caches
 **/.cache/
