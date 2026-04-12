@@ -25,6 +25,16 @@ export default function AdminDashboard() {
   });
   const [qImage, setQImage] = useState(null);
 
+  const toBoolean = (value) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value === 1;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return normalized === 'true' || normalized === 't' || normalized === '1';
+    }
+    return false;
+  };
+
   useEffect(() => {
     fetchRounds();
     fetchTeams();
@@ -58,7 +68,13 @@ export default function AdminDashboard() {
     }
     return api.get(`/questions/round/${rid}`).then(res => setQuestions(res.data));
   };
-  const fetchAccessCodes = () => api.get('/admin/access-codes').then(res => setAccessCodes(res.data));
+  const fetchAccessCodes = () =>
+    api.get('/admin/access-codes').then(res =>
+      setAccessCodes((res.data || []).map((code) => ({
+        ...code,
+        is_used: toBoolean(code.is_used),
+      })))
+    );
 
   useEffect(() => {
     fetchQuestions(selectedRound);
@@ -124,6 +140,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const deleteTeam = async (id, teamName) => {
+    if (!window.confirm(`Delete team "${teamName}"? This will remove its members and submissions.`)) return;
+
+    try {
+      await api.delete(`/admin/teams/${id}`);
+      fetchTeams();
+      fetchAccessCodes();
+    } catch (err) {
+      alert("Failed to delete team: " + (err.response?.data?.error || err.message));
+    }
+  };
+
   const approveSubmission = async (id) => {
     await api.patch(`/treasure/submission/${id}/approve`);
     fetchSubmissions();
@@ -145,11 +173,10 @@ export default function AdminDashboard() {
   };
 
   const deleteAccessCode = async (id, isUsed) => {
-    if (isUsed) {
-      alert('Used access codes cannot be deleted.');
-      return;
-    }
-    if (!window.confirm('Delete this access code?')) return;
+    const confirmMessage = isUsed
+      ? 'This code is already used by a team. Delete it anyway?'
+      : 'Delete this access code?';
+    if (!window.confirm(confirmMessage)) return;
 
     try {
       await api.delete(`/admin/access-codes/${id}`);
@@ -312,6 +339,7 @@ export default function AdminDashboard() {
                   <th className="p-4">Members</th>
                   <th className="p-4">Volunteer</th>
                   <th className="p-4 rounded-tr-lg text-right">Score</th>
+                  <th className="p-4 rounded-tr-lg text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -322,6 +350,14 @@ export default function AdminDashboard() {
                     <td className="p-4">{t.memory_count}</td>
                     <td className="p-4">{t.volunteer_name}</td>
                     <td className="p-4 text-right font-mono text-blue-400 font-bold">{t.total_score}</td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => deleteTeam(t.id, t.team_name)}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-red-500/20 text-red-300 hover:bg-red-500 hover:text-white transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -425,10 +461,9 @@ export default function AdminDashboard() {
                   )}
                   <button
                     onClick={() => deleteAccessCode(ac.id, ac.is_used)}
-                    disabled={ac.is_used}
                     className={`mt-2 px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                       ac.is_used
-                        ? 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
+                        ? 'bg-red-500/15 text-red-300 hover:bg-red-500 hover:text-white'
                         : 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white'
                     }`}
                   >

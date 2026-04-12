@@ -6,18 +6,36 @@ require('dotenv').config();
 let db;
 let initializePromise;
 
+const schemaPath = path.join(__dirname, 'schema.sql');
+
+const initializeDatabaseAt = async (dbPath) => {
+  const isNew = !fs.existsSync(dbPath);
+  const instance = new PGlite(dbPath);
+
+  // Force an initial query so path/storage errors surface immediately.
+  await instance.query('SELECT 1');
+
+  if (isNew) {
+    const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+    await instance.exec(schemaSql);
+    console.log(`PGlite DB initialized at ${dbPath}.`);
+  } else {
+    console.log(`PGlite DB loaded from ${dbPath}.`);
+  }
+
+  return instance;
+};
+
 const getDb = async () => {
   if (!db) {
-    const dbPath = path.join(__dirname, 'zeron_data');
-    const isNew = !fs.existsSync(dbPath);
-    db = new PGlite(dbPath);
-    
-    if (isNew) {
-      const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-      await db.exec(schemaSql);
-      console.log('PGlite persistent DB initialized and schema applied.');
-    } else {
-      console.log('PGlite persistent DB loaded.');
+    const primaryDbPath = path.join(__dirname, 'zeron_data');
+    const fallbackDbPath = path.join(__dirname, 'zeron_data_pglite');
+
+    try {
+      db = await initializeDatabaseAt(primaryDbPath);
+    } catch (error) {
+      console.warn(`Primary DB path failed (${primaryDbPath}). Falling back to ${fallbackDbPath}.`);
+      db = await initializeDatabaseAt(fallbackDbPath);
     }
   }
   return db;

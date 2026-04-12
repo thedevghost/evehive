@@ -3,6 +3,35 @@ const router = express.Router();
 const pool = require('../db/pool');
 const authenticateAdmin = require('../middleware/authenticateAdmin');
 
+const ADMIN_SECRET = (process.env.ADMIN_SECRET || 'admin123').trim();
+
+const toBoolean = (value) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value === 1;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    return normalized === 'true' || normalized === 't' || normalized === '1';
+  }
+  return false;
+};
+
+const deleteTeamAndCleanup = async (teamId, { removeAccessCode } = { removeAccessCode: false }) => {
+  const accessCodeResult = await pool.query('SELECT id FROM access_codes WHERE used_by_team_id = $1', [teamId]);
+
+  await pool.query('DELETE FROM answers WHERE team_id = $1', [teamId]);
+  await pool.query('DELETE FROM treasure_submissions WHERE team_id = $1', [teamId]);
+
+  if (removeAccessCode) {
+    if (accessCodeResult.rows.length > 0) {
+      await pool.query('DELETE FROM access_codes WHERE used_by_team_id = $1', [teamId]);
+    }
+  } else {
+    await pool.query('UPDATE access_codes SET used_by_team_id = NULL, is_used = FALSE WHERE used_by_team_id = $1', [teamId]);
+  }
+
+  await pool.query('DELETE FROM teams WHERE id = $1', [teamId]);
+};
+
 // Public seed endpoint - generates test access codes (dev only)
 router.post('/seed-codes', async (req, res) => {
   try {
@@ -20,9 +49,8 @@ router.post('/seed-codes', async (req, res) => {
 
 router.post('/login', (req, res) => {
   const { password } = req.body;
-  const adminSecret = (process.env.ADMIN_SECRET || '').trim();
-  if ((password || '').trim() === adminSecret) {
-    res.json({ token: adminSecret });
+  if ((password || '').trim() === ADMIN_SECRET) {
+    res.json({ token: ADMIN_SECRET });
   } else {
     res.status(401).json({ error: "Invalid admin credentials" });
   }
@@ -147,7 +175,10 @@ router.get('/access-codes', authenticateAdmin, async (req, res) => {
       LEFT JOIN teams t ON ac.used_by_team_id = t.id
       ORDER BY ac.id ASC
     `);
-    res.json(result.rows);
+    res.json(result.rows.map(row => ({
+      ...row,
+      is_used: toBoolean(row.is_used),
+    })));
   } catch (error) {
     res.status(500).json({ error: "Server Error" });
   }
@@ -178,18 +209,51 @@ router.delete('/access-codes/:id', authenticateAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const existing = await pool.query('SELECT id, is_used FROM access_codes WHERE id = $1', [id]);
+    const existing = await pool.query('SELECT id, used_by_team_id FROM access_codes WHERE id = $1', [id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({ error: 'Access code not found' });
     }
 
-    if (existing.rows[0].is_used) {
-      return res.status(400).json({ error: 'Used access codes cannot be deleted' });
+    const teamId = existing.rows[0].used_by_team_id;
+
+    await pool.query('BEGIN');
+
+    if (teamId) {
+      await deleteTeamAndCleanup(teamId, { removeAccessCode: false });
+      await pool.query('DELETE FROM access_codes WHERE id = $1', [id]);
+    } else {
+      await pool.query('DELETE FROM access_codes WHERE id = $1', [id]);
     }
 
-    await pool.query('DELETE FROM access_codes WHERE id = $1', [id]);
-    res.json({ message: 'Access code deleted successfully' });
+    await pool.query('COMMIT');
+
+    res.json({
+      message: teamId
+        ? 'Access code and linked team deleted successfully'
+        : 'Access code deleted successfully',
+      deleted_team_id: teamId || null,
+    });
   } catch (error) {
+    await pool.query('ROLLBACK');
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+router.delete('/teams/:id', authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const existing = await pool.query('SELECT id FROM teams WHERE id = $1', [id]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Team not found' });
+    }
+
+    await pool.query('BEGIN');
+    await deleteTeamAndCleanup(id, { removeAccessCode: false });
+    await pool.query('COMMIT');
+    res.json({ message: 'Team deleted successfully' });
+  } catch (error) {
+    await pool.query('ROLLBACK');
     res.status(500).json({ error: 'Server Error' });
   }
 });

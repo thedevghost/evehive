@@ -4,14 +4,24 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 
+const JWT_SECRET = (process.env.JWT_SECRET || 'dev-jwt-secret').trim();
+
 router.post('/register', async (req, res) => {
   const { team_name, username, password, volunteer_name, volunteer_phone, members, access_code } = req.body;
   try {
+    const normalizedTeamName = (team_name || '').trim();
+    const normalizedUsername = (username || '').trim().toLowerCase();
+    const normalizedAccessCode = (access_code || '').trim().toUpperCase();
+
+    if (!normalizedTeamName || !normalizedUsername || !password) {
+      return res.status(400).json({ error: 'Team name, username and password are required.' });
+    }
+
     if (!access_code) {
       return res.status(400).json({ error: "Access code is required to register." });
     }
 
-    const codeCheck = await pool.query('SELECT * FROM access_codes WHERE code = $1', [access_code]);
+    const codeCheck = await pool.query('SELECT * FROM access_codes WHERE code = $1', [normalizedAccessCode]);
     if (codeCheck.rows.length === 0) {
       return res.status(400).json({ error: "Invalid access code." });
     }
@@ -19,9 +29,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: "Access code has already been used." });
     }
 
-    const checkTeam = await pool.query('SELECT * FROM teams WHERE team_name = $1 OR username = $2', [team_name, username]);
+    const checkTeam = await pool.query(
+      'SELECT * FROM teams WHERE LOWER(team_name) = LOWER($1) OR LOWER(username) = LOWER($2)',
+      [normalizedTeamName, normalizedUsername]
+    );
     if (checkTeam.rows.length > 0) {
-      if (checkTeam.rows[0].team_name === team_name) {
+      if ((checkTeam.rows[0].team_name || '').toLowerCase() === normalizedTeamName.toLowerCase()) {
         return res.status(400).json({ error: "Team name already taken. Please choose another name." });
       }
       return res.status(400).json({ error: "Username already taken." });
@@ -33,7 +46,7 @@ router.post('/register', async (req, res) => {
     await pool.query('BEGIN');
     const newTeam = await pool.query(
       'INSERT INTO teams (team_name, username, password_hash, volunteer_name, volunteer_phone) VALUES ($1, $2, $3, $4, $5) RETURNING id, team_name, username, total_score',
-      [team_name, username, password_hash, volunteer_name, volunteer_phone]
+      [normalizedTeamName, normalizedUsername, password_hash, volunteer_name, volunteer_phone]
     );
     const teamId = newTeam.rows[0].id;
 
@@ -44,12 +57,12 @@ router.post('/register', async (req, res) => {
     }
     
     // Mark access code as used
-    await pool.query('UPDATE access_codes SET is_used = TRUE, used_by_team_id = $1 WHERE code = $2', [teamId, access_code]);
+    await pool.query('UPDATE access_codes SET is_used = TRUE, used_by_team_id = $1 WHERE code = $2', [teamId, normalizedAccessCode]);
 
     await pool.query('COMMIT');
 
-    const payload = { team_id: teamId, team_name, username };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const payload = { team_id: teamId, team_name: normalizedTeamName, username: normalizedUsername };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 
     res.status(201).json({ token, team: payload });
   } catch (error) {
@@ -62,7 +75,15 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM teams WHERE username = $1', [username]);
+    const identity = (username || '').trim();
+    if (!identity || !password) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    const result = await pool.query(
+      'SELECT * FROM teams WHERE LOWER(username) = LOWER($1) OR LOWER(team_name) = LOWER($1) LIMIT 1',
+      [identity]
+    );
     if (result.rows.length === 0) return res.status(400).json({ error: "Invalid credentials" });
     
     const team = result.rows[0];
@@ -70,7 +91,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     const payload = { team_id: team.id, team_name: team.team_name, username: team.username };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
     res.json({ token, team: payload });
   } catch (error) {
     console.error(error);
