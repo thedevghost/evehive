@@ -1,0 +1,496 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: #0b0f1a;
+    --foreground: #e7ebff;
+    --primary: #4f46e5;
+    --primary-foreground: #ffffff;
+    --secondary: #343b5d;
+    --secondary-foreground: #ffffff;
+    --accent: #1a2036;
+    --glass-bg: rgba(20, 26, 45, 0.78);
+    --glass-border: rgba(115, 130, 201, 0.22);
+    --glass-shadow: rgba(2, 6, 23, 0.72);
+    --glow: rgba(79, 70, 229, 0.22);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100dvh;
+    /* Glow uses the --glow variable so it adapts to light/dark */
+    background-image:
+      radial-gradient(ellipse 80% 80% at 50% -20%, var(--glow, rgba(255,255,255,0.05)) 0%, transparent 60%);
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  input, textarea, select, button {
+    touch-action: manipulation;
+    min-height: 44px;
+    font-family: var(--font-sans);
+  }
+
+  * { box-sizing: border-box; cursor: none !important; }
+
+  ::selection {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 16px 48px 0 var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+    border-radius: 1.5rem;
+  }
+
+  .glass-card-sm {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+  }
+
+  .glow-border {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 0 20px rgba(255,255,255,0.05);
+  }
+
+  .shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: shineMove 4s ease-in-out infinite;
+  }
+
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+@keyframes shineMove {
+  0% { left: -100%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* ── LIGHT MODE OVERRIDES ─────────────────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Body background for light */
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 70% 70% at 15% 20%, rgba(79,70,229,0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 65% at 85% 0%, rgba(59,130,246,0.16) 0%, transparent 58%),
+    linear-gradient(180deg, #f1f4ff 0%, #e8edff 100%);
+}
+
+/* Glass cards: white cards with indigo border like reference */
+[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1.5px solid rgba(79, 70, 229, 0.22);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.16), 0 2px 8px rgba(15,23,42,0.08);
+}
+[data-theme="light"] .glass-card-sm {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(79, 70, 229, 0.18);
+}
+[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+}
+
+/* All headings → dark espresso */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4 {
+  color: #1c1208;
+}
+
+/* Override white text opacity classes used in JSX */
+[data-theme="light"] [class*="text-white"] {
+  color: #142475 !important;
+}
+
+/* Low-opacity white text → muted brown-gray */
+[data-theme="light"] [class*="text-white/20"],
+[data-theme="light"] [class*="text-white/25"],
+[data-theme="light"] [class*="text-white/30"] {
+  color: rgba(67, 56, 202, 0.52) !important;
+}
+
+[data-theme="light"] [class*="text-white/40"],
+[data-theme="light"] [class*="text-white/50"] {
+  color: rgba(49, 46, 129, 0.64) !important;
+}
+
+[data-theme="light"] [class*="text-white/60"],
+[data-theme="light"] [class*="text-white/70"],
+[data-theme="light"] [class*="text-white/80"] {
+  color: rgba(30, 41, 105, 0.82) !important;
+}
+
+/* Inputs: solid visible look */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: rgba(255, 255, 255, 0.97) !important;
+  color: #1e1b4b !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  box-shadow: 0 1px 3px rgba(30,41,59,0.04) inset;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: rgba(79, 70, 229, 0.4) !important;
+}
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgba(29,78,216,0.16) !important;
+}
+
+/* Green submit button stays green */
+[data-theme="light"] button[class*="bg-green"] {
+  box-shadow: 0 2px 12px rgba(22,163,74,0.3) !important;
+}
+
+/* White border/bg opacity helpers → orange or green tints */
+[data-theme="light"] [class*="border-white"] {
+  border-color: rgba(79, 70, 229, 0.18) !important;
+}
+[data-theme="light"] [class*="bg-white/"] {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
+[data-theme="light"] [class*="bg-black/"] {
+  background-color: rgba(79, 70, 229, 0.06) !important;
+}
+
+/* Ring/focus states */
+[data-theme="light"] [class*="ring-white"] {
+  --tw-ring-color: rgba(79, 70, 229, 0.28) !important;
+}
+
+/* Selection */
+[data-theme="light"] ::selection {
+  background: rgba(79, 70, 229, 0.2);
+  color: #1e1b4b;
+}
+
+/* Divider lines */
+[data-theme="light"] [class*="border-white/"] {
+  border-color: rgba(79, 70, 229, 0.14) !important;
+}
+
+/* Strengthen subtle borders so cards/boxes remain visible in light mode */
+[data-theme="light"] [class*="border-white/5"],
+[data-theme="light"] [class*="border-white/10"],
+[data-theme="light"] [class*="border-white/15"],
+[data-theme="light"] [class*="border-white/20"] {
+  border-color: rgba(79, 70, 229, 0.24) !important;
+}
+
+/* Ensure slate-based panels are visible in light mode across all pages */
+[data-theme="light"] [class*="bg-slate-900"],
+[data-theme="light"] [class*="bg-slate-800"],
+[data-theme="light"] [class*="bg-slate-700"] {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(79, 70, 229, 0.2) !important;
+}
+
+/* Improve visibility for very low-opacity white surfaces used as boxes */
+[data-theme="light"] [class*="bg-white/2"],
+[data-theme="light"] [class*="bg-white/3"],
+[data-theme="light"] [class*="bg-white/4"],
+[data-theme="light"] [class*="bg-white/5"] {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+/* Subtle element backgrounds */
+[data-theme="light"] [class*="bg-white/5"],
+[data-theme="light"] [class*="bg-white/4"],
+[data-theme="light"] [class*="bg-white/3"] {
+  background-color: rgba(79, 70, 229, 0.05) !important;
+}
+
+/* Logout / ghost buttons */
+[data-theme="light"] button[class*="glass-card-sm"] {
+  color: #1e1b4b !important;
+  border-color: rgba(79, 70, 229, 0.25) !important;
+}
+
+/* Animate dots (live indicator) */
+[data-theme="light"] [class*="bg-white/40"],
+[data-theme="light"] [class*="bg-white/30"] {
+  background-color: #1d4ed8 !important;
+}
+
+/* Shine shimmer: use indigo tint in light mode */
+[data-theme="light"] .shine::before {
+  background: linear-gradient(120deg, transparent, rgba(79,70,229,0.08), transparent);
+}
+
+/* Leaderboard top-3: complementary palette for light mode */
+[data-theme="light"] .leaderboard-rank-card.leaderboard-rank-1 {
+  background: linear-gradient(120deg, #16e085 0%, #08b66a 100%) !important;
+  border-color: rgba(145, 255, 208, 0.52) !important;
+  box-shadow: 0 10px 24px rgba(8, 182, 106, 0.28) !important;
+}
+
+[data-theme="light"] .leaderboard-rank-card.leaderboard-rank-2 {
+  background: linear-gradient(120deg, #5b8dff 0%, #4a5cf2 100%) !important;
+  border-color: rgba(171, 196, 255, 0.55) !important;
+  box-shadow: 0 10px 24px rgba(74, 92, 242, 0.28) !important;
+}
+
+[data-theme="light"] .leaderboard-rank-card.leaderboard-rank-3 {
+  background: linear-gradient(120deg, #6c7dff 0%, #5a49d9 100%) !important;
+  border-color: rgba(184, 175, 255, 0.52) !important;
+  box-shadow: 0 10px 24px rgba(90, 73, 217, 0.25) !important;
+}
+
+[data-theme="light"] .leaderboard-rank-badge.leaderboard-rank-1 {
+  background: linear-gradient(180deg, #0fcd79, #08a964) !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-badge.leaderboard-rank-2 {
+  background: linear-gradient(180deg, #5d90ff, #4858f0) !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-badge.leaderboard-rank-3 {
+  background: linear-gradient(180deg, #7587ff, #5a49d9) !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-dot.leaderboard-rank-1 {
+  background: #08b66a !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-dot.leaderboard-rank-2 {
+  background: #4a5cf2 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-dot.leaderboard-rank-3 {
+  background: #5a49d9 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-score.leaderboard-rank-1 {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-score.leaderboard-rank-2 {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-score.leaderboard-rank-3 {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .leaderboard-rank-card.leaderboard-rank-1 [class*="text-white"],
+[data-theme="light"] .leaderboard-rank-card.leaderboard-rank-2 [class*="text-white"],
+[data-theme="light"] .leaderboard-rank-card.leaderboard-rank-3 [class*="text-white"] {
+  color: #ffffff !important;
+}
+
+/* ── DARK MODE REFINEMENT (reference style) ───────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(ellipse 75% 75% at 50% -20%, rgba(79, 70, 229, 0.24) 0%, transparent 60%),
+    linear-gradient(180deg, #0b0f1a 0%, #090d17 100%);
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(17, 22, 38, 0.9);
+  border: 1px solid rgba(107, 114, 168, 0.24);
+  box-shadow: 0 14px 32px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(147, 161, 255, 0.08);
+}
+
+[data-theme="dark"] .glass-card-sm,
+[data-theme="dark"] .glass {
+  background: rgba(14, 18, 31, 0.82);
+  border: 1px solid rgba(90, 101, 151, 0.24);
+}
+
+[data-theme="dark"] [class*="bg-slate-900"],
+[data-theme="dark"] [class*="bg-slate-800"],
+[data-theme="dark"] [class*="bg-slate-700"] {
+  background-color: rgba(17, 22, 38, 0.92) !important;
+}
+
+[data-theme="dark"] [class*="text-slate-400"],
+[data-theme="dark"] [class*="text-white/40"],
+[data-theme="dark"] [class*="text-white/30"] {
+  color: #9aa4d4 !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: rgba(12, 16, 28, 0.9) !important;
+  border-color: rgba(92, 106, 173, 0.4) !important;
+  color: #e8ecff !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: rgba(154, 164, 212, 0.65) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+[data-theme="dark"] .shine::before {
+  background: linear-gradient(120deg, transparent, rgba(99, 102, 241, 0.12), transparent);
+}
+
+/* Admin console light-mode palette alignment */
+[data-theme="light"] .admin-console {
+  color: #1e1b4b;
+}
+
+[data-theme="light"] .admin-console [class*="bg-slate-900"],
+[data-theme="light"] .admin-console [class*="bg-slate-800"],
+[data-theme="light"] .admin-console [class*="bg-slate-700"] {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(79, 70, 229, 0.2) !important;
+}
+
+[data-theme="light"] .admin-console [class*="text-slate-400"],
+[data-theme="light"] .admin-console [class*="text-slate-500"] {
+  color: rgba(55, 48, 163, 0.65) !important;
+}
+
+[data-theme="light"] .admin-console [class*="border-white/5"],
+[data-theme="light"] .admin-console [class*="border-white/10"] {
+  border-color: rgba(79, 70, 229, 0.15) !important;
+}
+
+[data-theme="light"] .admin-console [class*="hover:bg-white/5"] {
+  background-color: rgba(79, 70, 229, 0.05) !important;
+}
+
+/* Tabs: switch green tab system to blue/indigo in light mode */
+[data-theme="light"] .admin-console [class*="bg-green-500 text-white border-green-500"] {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(29, 78, 216, 0.25) !important;
+}
+
+[data-theme="light"] .admin-console [class*="border-green-500/30 text-green-400"] {
+  border-color: rgba(79, 70, 229, 0.35) !important;
+  color: #4338ca !important;
+  background-color: rgba(79, 70, 229, 0.04) !important;
+}
+
+[data-theme="light"] .admin-console [class*="hover:bg-green-500/10"]:hover {
+  background-color: rgba(79, 70, 229, 0.1) !important;
+}
+
+[data-theme="light"] .admin-console [class*="hover:border-green-500/60"]:hover {
+  border-color: rgba(79, 70, 229, 0.6) !important;
+}
+
+/* Action buttons harmonized with light palette */
+[data-theme="light"] .admin-console [class*="bg-violet-600"] {
+  background-color: #4f46e5 !important;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.22) !important;
+}
+
+[data-theme="light"] .admin-console [class*="hover:bg-violet-500"]:hover {
+  background-color: #4338ca !important;
+}
+
+[data-theme="light"] .admin-console [class*="text-blue-400"] {
+  color: #2563eb !important;
+}
+
+[data-theme="light"] .admin-console [class*="text-amber-400"] {
+  color: #d97706 !important;
+}
+
+[data-theme="light"] .admin-console [class*="bg-green-900/20"] {
+  background-color: rgba(34, 197, 94, 0.12) !important;
+}
+
+[data-theme="light"] .admin-console [class*="border-green-500/30"] {
+  border-color: rgba(34, 197, 94, 0.32) !important;
+}
+
+[data-theme="light"] .admin-console [class*="text-green-400"] {
+  color: #16a34a !important;
+}
+
