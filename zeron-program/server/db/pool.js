@@ -30,12 +30,18 @@ const getDb = async () => {
   if (!db) {
     const primaryDbPath = path.join(__dirname, 'zeron_data');
     const fallbackDbPath = path.join(__dirname, 'zeron_data_pglite');
+    const cloudTmpPath = '/tmp/zeron_pglite';
 
     try {
       db = await initializeDatabaseAt(primaryDbPath);
     } catch (error) {
-      console.warn(`Primary DB path failed (${primaryDbPath}). Falling back to ${fallbackDbPath}.`);
-      db = await initializeDatabaseAt(fallbackDbPath);
+      console.warn(`Primary DB path failed (${primaryDbPath}). Trying fallback...`);
+      try {
+        db = await initializeDatabaseAt(fallbackDbPath);
+      } catch (fbError) {
+        console.warn(`Fallback DB path failed (${fallbackDbPath}). Trying /tmp...`);
+        db = await initializeDatabaseAt(cloudTmpPath);
+      }
     }
   }
   return db;
