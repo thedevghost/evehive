@@ -14,13 +14,13 @@ router.get('/tasks/:round_id', authenticateTeam, async (req, res) => {
 });
 
 router.post('/submit', authenticateTeam, async (req, res) => {
-  const { task_id, submission_proof } = req.body;
+  const { task_id, submission_proof, submitted_by } = req.body;
   const teamId = req.team.team_id;
 
   try {
     const result = await pool.query(
-      'INSERT INTO treasure_submissions (team_id, task_id, submission_proof) VALUES ($1, $2, $3) RETURNING *',
-      [teamId, task_id, submission_proof]
+      'INSERT INTO treasure_submissions (team_id, task_id, submission_proof, submitted_by) VALUES ($1, $2, $3, $4) RETURNING *',
+      [teamId, task_id, submission_proof, submitted_by]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {

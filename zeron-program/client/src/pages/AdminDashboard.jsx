@@ -370,46 +370,78 @@ export default function AdminDashboard() {
       )}
 
       {activeTab === 'treasure' && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold mb-4">Treasure Submissions</h3>
-          {submissions.length === 0 ? <p className="text-slate-500">No submissions yet.</p> : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {submissions.map(sub => (
-                <div key={sub.id} className="bg-slate-900 border border-white/10 rounded-2xl p-6 relative">
-                  <div className="text-xs text-slate-500 absolute top-4 right-4">{new Date(sub.submitted_at).toLocaleTimeString()}</div>
-                  <h4 className="font-bold text-lg mb-1">{sub.team_name}</h4>
-                  <p className="text-sm text-amber-400 mb-4">{sub.task_description}</p>
-                  <div className="mb-3">
-                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                      sub.status === 'approved'
-                        ? 'bg-green-500/20 text-green-400 border border-green-500/40'
-                        : sub.status === 'rejected'
-                        ? 'bg-red-500/20 text-red-400 border border-red-500/40'
-                        : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40'
-                    }`}>
-                      {sub.status}
-                    </span>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-2xl font-black text-foreground">Treasure Submissions</h3>
+            <div className="text-[10px] tracking-widest text-foreground/30 uppercase font-black bg-foreground/5 px-3 py-1 rounded-full">
+              Review Required
+            </div>
+          </div>
+          
+          {submissions.length === 0 ? (
+            <div className="glass p-20 rounded-3xl border-2 border-dashed border-primary/20 text-center">
+              <p className="text-foreground/30 font-bold uppercase tracking-widest">No submissions yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {/* Grouping logic by team */}
+              {Array.from(new Set(submissions.map(s => s.team_name))).map(teamName => (
+                <div key={teamName} className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="h-[2px] flex-1 bg-gradient-to-r from-primary/30 to-transparent" />
+                    <h4 className="text-xl font-black text-primary uppercase tracking-tighter">{teamName}</h4>
+                    <div className="h-[2px] flex-1 bg-gradient-to-l from-primary/30 to-transparent" />
                   </div>
                   
-                  <div className="bg-slate-800 p-3 rounded-lg mb-6 max-h-32 overflow-y-auto">
-                    <p className="font-mono text-xs break-all">{sub.submission_proof}</p>
-                    {sub.submission_proof?.startsWith('http') && (
-                      <a href={sub.submission_proof} target="_blank" className="text-blue-400 text-xs mt-2 inline-block hover:underline">Open Link</a>
-                    )}
-                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {submissions.filter(s => s.team_name === teamName).map(sub => (
+                      <div key={sub.id} className={`glass p-6 rounded-2xl border-2 transition-all relative overflow-hidden flex flex-col ${
+                        sub.status === 'pending' ? 'border-primary/40 shadow-[0_0_30px_rgba(var(--primary),0.1)]' : 'border-white/5 opacity-80'
+                      }`}>
+                        <div className="absolute top-0 right-0 p-3">
+                          <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded-md ${
+                            sub.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                            sub.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                            'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          }`}>
+                            {sub.status}
+                          </span>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <div className="text-[10px] text-primary font-black uppercase tracking-widest mb-1">Submitted By</div>
+                          <div className="text-lg font-black text-foreground">{sub.submitted_by || 'Unknown Member'}</div>
+                          <div className="text-[10px] text-foreground/30 font-bold">{new Date(sub.submitted_at).toLocaleString()}</div>
+                        </div>
 
-                  {sub.status === 'pending' ? (
-                    <div className="flex gap-3">
-                      <button onClick={() => approveSubmission(sub.id)} className="flex-1 py-2 bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-semibold">
-                        <Check className="w-4 h-4" /> Approve
-                      </button>
-                      <button onClick={() => rejectSubmission(sub.id)} className="flex-1 py-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-semibold">
-                        <X className="w-4 h-4" /> Reject
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-400 font-medium">This submission has been reviewed.</div>
-                  )}
+                        <div className="flex-1">
+                          <div className="text-[10px] text-foreground/30 font-black uppercase tracking-widest mb-1">Task</div>
+                          <p className="text-sm font-bold text-foreground/80 leading-relaxed mb-4">{sub.task_description}</p>
+                          
+                          <div className="text-[10px] text-foreground/30 font-black uppercase tracking-widest mb-1">Proof Provided</div>
+                          <div className="bg-background/80 border border-white/5 p-4 rounded-xl mb-6 min-h-[80px] break-all">
+                            <p className="font-mono text-xs text-foreground/70">{sub.submission_proof}</p>
+                            {sub.submission_proof?.startsWith('http') && (
+                              <a href={sub.submission_proof} target="_blank" rel="noreferrer" className="text-primary text-[10px] font-black uppercase mt-3 inline-flex items-center gap-1 hover:underline">
+                                View Online Resource <ArrowRight className="w-2.5 h-2.5" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {sub.status === 'pending' && (
+                          <div className="flex gap-2 pt-2">
+                            <button onClick={() => approveSubmission(sub.id)} className="flex-1 py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl flex items-center justify-center gap-2 transition-all font-black text-xs shadow-lg shadow-green-500/20">
+                              <Check className="w-4 h-4" /> Approve
+                            </button>
+                            <button onClick={() => rejectSubmission(sub.id)} className="flex-1 py-3 bg-red-500 hover:bg-red-400 text-white rounded-xl flex items-center justify-center gap-2 transition-all font-black text-xs shadow-lg shadow-red-500/20">
+                              <X className="w-4 h-4" /> Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

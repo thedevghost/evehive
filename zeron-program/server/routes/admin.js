@@ -74,7 +74,7 @@ router.get('/teams', authenticateAdmin, async (req, res) => {
 router.get('/submissions', authenticateAdmin, async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT ts.id, ts.submission_proof, ts.status, ts.submitted_at,
+      SELECT ts.id, ts.submission_proof, ts.status, ts.submitted_at, ts.submitted_by,
              t.team_name,
              tt.task_description
       FROM treasure_submissions ts

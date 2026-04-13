@@ -27,6 +27,9 @@ const getDb = async () => {
       if (tableCheck.rows.length === 0) {
         console.log('Initializing schema for real PostgreSQL...');
         await pool.query(schemaSql);
+      } else {
+        // Migration: Ensure submitted_by exists
+        await pool.query("ALTER TABLE treasure_submissions ADD COLUMN IF NOT EXISTS submitted_by VARCHAR(100)");
       }
       db = pool;
       return db;
