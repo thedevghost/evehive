@@ -20,6 +20,7 @@ const corsOptions = {
     
     const isAllowed = allowedOrigins.includes(origin) || 
                      origin.endsWith('.vercel.app') || 
+                     origin.includes('evehive.vercel.app') ||
                      origin === process.env.CLIENT_URL;
 
     if (isAllowed) {
