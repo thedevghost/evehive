@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Signal, Crown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const getMedalColor = (rank) => {
   if (rank === 1) return 'from-green-400 to-emerald-600';
@@ -25,10 +26,12 @@ export default function LeaderboardPanel({ leaderboard, teamId }) {
         <div className="flex items-center gap-2">
           <span className="text-[10px] tracking-[0.25em] text-white/30 uppercase font-medium">Leaderboard</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
-          <span className="text-[9px] text-white/25 uppercase tracking-widest font-medium">Live</span>
-        </div>
+        <Link 
+          to="/leaderboard" 
+          className="text-[10px] px-3 py-1.5 glass-card-sm rounded-lg text-white/40 hover:text-white/80 transition-all font-bold uppercase tracking-widest hover:bg-white/[0.05]"
+        >
+          View Full
+        </Link>
       </div>
 
       <div className="space-y-2">
