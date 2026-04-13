@@ -18,19 +18,19 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const isAllowed = allowedOrigins.includes(origin) || 
-                     origin.endsWith('.vercel.app') || 
-                     origin.includes('evehive.vercel.app') ||
-                     origin === process.env.CLIENT_URL;
+    // Check if origin is localhost or vercel.app
+    const isVercel = origin.endsWith('.vercel.app') || origin.includes('evehive.vercel.app');
+    const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
 
-    if (isAllowed) {
+    if (isVercel || isLocal || origin === process.env.CLIENT_URL) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 const io = new Server(server, {

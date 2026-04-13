@@ -16,7 +16,7 @@ router.get('/me', authenticateTeam, async (req, res) => {
   }
 });
 
-router.get('/leaderboard', authenticateTeam, async (req, res) => {
+router.get('/leaderboard', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
