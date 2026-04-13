@@ -17,6 +17,20 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Team name, username and password are required.' });
     }
 
+    // Phone validation
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(volunteer_phone)) {
+      return res.status(400).json({ error: 'Volunteer phone must be exactly 10 digits.' });
+    }
+
+    if (members && members.length > 0) {
+      for (let i = 0; i < members.length; i++) {
+        if (!phoneRegex.test(members[i].phone_number)) {
+          return res.status(400).json({ error: `Member #${i + 1} phone must be exactly 10 digits.` });
+        }
+      }
+    }
+
     if (!access_code) {
       return res.status(400).json({ error: "Access code is required to register." });
     }

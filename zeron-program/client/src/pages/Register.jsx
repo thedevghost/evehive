@@ -29,6 +29,23 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Phone validation
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.volunteer_phone)) {
+      setError('Volunteer phone must be exactly 10 digits');
+      setLoading(false);
+      return;
+    }
+
+    for (let i = 0; i < members.length; i++) {
+      if (!phoneRegex.test(members[i].phone_number)) {
+        setError(`Member #${i + 1} phone must be exactly 10 digits`);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const res = await api.post('/auth/register', { ...formData, members });
       login(res.data.token, res.data.team);
@@ -111,7 +128,7 @@ export default function Register() {
                 <input required type="text" className={inputClass} placeholder="Volunteer Name" value={formData.volunteer_name} onChange={e => setFormData({ ...formData, volunteer_name: e.target.value })} />
               </div>
               <div>
-                <input required type="text" className={inputClass} placeholder="Volunteer Phone" value={formData.volunteer_phone} onChange={e => setFormData({ ...formData, volunteer_phone: e.target.value })} />
+                <input required type="text" maxLength="10" pattern="\d*" className={inputClass} placeholder="Volunteer Phone" value={formData.volunteer_phone} onChange={e => setFormData({ ...formData, volunteer_phone: e.target.value.replace(/\D/g, '') })} />
               </div>
             </div>
 
@@ -141,7 +158,7 @@ export default function Register() {
                       </div>
                       <input required type="text" placeholder="Member name" value={m.name} onChange={e => handleMemberChange(idx, 'name', e.target.value)}
                         className="flex-1 glass-card-sm px-3 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all font-medium" />
-                      <input required type="text" placeholder="Phone" value={m.phone_number} onChange={e => handleMemberChange(idx, 'phone_number', e.target.value)}
+                      <input required type="text" maxLength="10" pattern="\d*" placeholder="Phone" value={m.phone_number} onChange={e => handleMemberChange(idx, 'phone_number', e.target.value.replace(/\D/g, ''))}
                         className="flex-1 glass-card-sm px-3 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all font-medium" />
                       {members.length > 1 && (
                         <button type="button" onClick={() => removeMember(idx)}
