@@ -412,6 +412,31 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
 }
 
+/* Dark mode leaderboard refinement */
+[data-theme="dark"] .leaderboard-rank-card.leaderboard-rank-1 {
+  background: linear-gradient(120deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%) !important;
+  border-color: rgba(52, 211, 153, 0.4) !important;
+  box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.3) !important;
+}
+[data-theme="dark"] .leaderboard-rank-card.leaderboard-rank-2 {
+  background: linear-gradient(120deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.05) 100%) !important;
+  border-color: rgba(96, 165, 250, 0.4) !important;
+  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.3) !important;
+}
+[data-theme="dark"] .leaderboard-rank-card.leaderboard-rank-3 {
+  background: linear-gradient(120deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%) !important;
+  border-color: rgba(251, 146, 60, 0.4) !important;
+  box-shadow: 0 10px 40px -10px rgba(249, 115, 22, 0.3) !important;
+}
+[data-theme="dark"] .leaderboard-rank-badge.leaderboard-rank-3 {
+  background: linear-gradient(180deg, #f97316, #ea580c) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .leaderboard-rank-dot.leaderboard-rank-3 {
+  background: #f97316 !important;
+  color: #fff !important;
+}
+
 [data-theme="dark"] .shine::before {
   background: linear-gradient(120deg, transparent, rgba(99, 102, 241, 0.12), transparent);
 }
