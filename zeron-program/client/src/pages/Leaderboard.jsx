@@ -73,11 +73,11 @@ export default function Leaderboard() {
                   scoreColor = 'text-blue-300';
                 scoreSize = 'text-3xl';
               } else if (isThird) {
-                  badgeBG = 'bg-gradient-to-r from-red-400/20 to-rose-600/20 border-red-300/60 shadow-lg shadow-red-500/20';
-                  containerBG = 'shadow-[0_0_30px_rgba(239,68,68,0.18)]';
+                  badgeBG = 'bg-gradient-to-r from-orange-400/20 to-amber-600/20 border-orange-300/60 shadow-lg shadow-orange-500/20';
+                  containerBG = 'shadow-[0_0_30px_rgba(249,115,22,0.18)]';
                 textSize = 'text-lg';
                 nameColor = 'text-white/80';
-                  scoreColor = 'text-red-300';
+                  scoreColor = 'text-orange-300';
                 scoreSize = 'text-2xl';
               }
               
@@ -106,7 +106,7 @@ export default function Leaderboard() {
                       <div className={`leaderboard-rank-dot ${rankClass} absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${
                         isFirst ? 'bg-green-500 text-white' :
                         isSecond ? 'bg-blue-500 text-white' :
-                        'bg-red-500 text-white'
+                        'bg-orange-500 text-white'
                     } border-2 border-white/40 shadow-lg`}>
                       {index + 1}
                     </div>

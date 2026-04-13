@@ -6,14 +6,14 @@ import { Link } from 'react-router-dom';
 const getMedalColor = (rank) => {
   if (rank === 1) return 'from-green-400 to-emerald-600';
   if (rank === 2) return 'from-blue-400 to-indigo-600';
-  if (rank === 3) return 'from-red-400 to-rose-600';
+  if (rank === 3) return 'from-orange-400 to-amber-600';
   return 'from-white/20 to-white/10';
 };
 
 const getMedalBgColor = (rank) => {
   if (rank === 1) return 'bg-green-500/20 border-green-300/60';
   if (rank === 2) return 'bg-blue-500/20 border-blue-300/60';
-  if (rank === 3) return 'bg-red-500/20 border-red-300/60';
+  if (rank === 3) return 'bg-orange-500/20 border-orange-300/60';
   return 'bg-white/[0.03] border-white/10';
 };
 
