@@ -83,6 +83,37 @@ export default function QRScanner({ isOpen, onClose }) {
     onClose();
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0);
+
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+          const scannedUrl = code.data;
+          const path = scannedUrl.includes('/hint/') ? scannedUrl.substring(scannedUrl.indexOf('/hint/')) : scannedUrl;
+          onClose();
+          navigate(path);
+        } else {
+          setError('No QR code found in this image.');
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -105,7 +136,7 @@ export default function QRScanner({ isOpen, onClose }) {
                 <div className="bg-primary/20 p-2 rounded-lg">
                   <QrCode className="w-6 h-6 text-primary" />
                 </div>
-                Scan Question QR
+                Scan Hint
               </h2>
               <button
                 onClick={handleClose}
@@ -130,8 +161,24 @@ export default function QRScanner({ isOpen, onClose }) {
                   <QrCode className="w-5 h-5" />
                   Start Camera Scanner
                 </button>
-                <p className="text-sm text-white/50 text-center">
-                  Point your camera at a question QR code to scan it.
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
+                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-white/20">or</span></div>
+                </div>
+
+                <label className="w-full py-4 bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-white/70 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  Select from Gallery
+                </label>
+
+                <p className="text-sm text-white/40 text-center font-light">
+                  Use your camera or upload a saved QR image.
                 </p>
               </div>
             ) : (
@@ -140,6 +187,7 @@ export default function QRScanner({ isOpen, onClose }) {
                   <video
                     ref={videoRef}
                     autoPlay
+                    playsInline
                     className="w-full aspect-video object-cover"
                   />
                   <canvas ref={canvasRef} className="hidden" />
