@@ -104,7 +104,9 @@ export default function HintViewer() {
         {hint.question_image_url && (
           <div className="mb-8 rounded-2xl overflow-hidden border-2 border-white/10 shadow-lg relative group bg-black/40">
             <img 
-              src={hint.question_image_url} 
+              src={hint.question_image_url.startsWith('http') 
+                ? hint.question_image_url.replace('http://', 'https://') 
+                : `${api.defaults.baseURL.replace('/api', '')}${hint.question_image_url}`} 
               alt="Hint Clue" 
               className="w-full h-auto object-contain max-h-[50vh]"
             />

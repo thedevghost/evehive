@@ -155,7 +155,9 @@ export default function QuizGame() {
               {activeQuestion.question_image_url && (
                 <div className="mt-6 rounded-xl overflow-hidden glass-card-sm">
                   <img
-                    src={activeQuestion.question_image_url}
+                    src={activeQuestion.question_image_url.startsWith('http') 
+                      ? activeQuestion.question_image_url.replace('http://', 'https://') 
+                      : `${api.defaults.baseURL.replace('/api', '')}${activeQuestion.question_image_url}`}
                     alt="Question"
                     className="w-full max-h-72 object-contain"
                   />
