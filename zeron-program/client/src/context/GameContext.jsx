@@ -24,7 +24,9 @@ export const GameProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const socketBase = import.meta.env.VITE_SOCKET_URL || (isLocal ? 'http://localhost:5000' : window.location.origin);
+    const newSocket = io(socketBase);
     setSocket(newSocket);
 
     if (team) {
