@@ -190,7 +190,7 @@ export default function AdminDashboard() {
     <div className="admin-console min-h-screen p-6 max-w-7xl mx-auto text-foreground">
       <BackButton fallback="/login?type=admin" label="Back" />
       <header className="flex justify-between items-center mb-8 border-b-2 border-primary/20 pb-6">
-        <h1 className="text-3xl font-black text-primary drop-shadow-[0_0_10px_var(--primary)] uppercase tracking-widest">Admin Console</h1>
+        <h1 className="text-3xl font-black text-primary drop-shadow-[0_0_10px_var(--primary)] uppercase tracking-widest">Admin Console <span className="text-[10px] align-middle opacity-50">(v2.1)</span></h1>
         <div className="flex gap-4">
           <a href={`${api.defaults.baseURL}/qr`} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm" title="Invite teams using QR">
             <QrCode className="w-4 h-4" /> Invite Teams (QR)
